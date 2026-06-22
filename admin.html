@@ -3118,7 +3118,7 @@ window.quiz = {
 
       ui.copyShareLinkBtn.addEventListener('click', () => {
         if (!state.sessionId) return;
-        const link = `${window.location.origin}/quiz-player.html?code=${state.sessionId}`;
+        const link = `${window.location.origin}/index.html?code=${state.sessionId}`;
         navigator.clipboard.writeText(link).then(() => {
           const originalText = ui.copyShareLinkBtn.innerText;
           ui.copyShareLinkBtn.innerText = "✅ Copied!";
