@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <title>Live Survey | WorkMesh Arcade</title>
+  <link rel="stylesheet" href="css/player.css">
+</head>
+<body class="quiz-page">
+  <main class="quiz-player-shell">
+    <header class="quiz-app-header">
+      <div class="quiz-brand">
+        <a href="index.html" title="Back to Arcade"><img src="img/logo.jpg" alt="WorkMesh" style="width: 44px; height: 44px; border-radius: 12px; object-fit: cover; box-shadow: 0 4px 12px rgba(0,0,0,0.1);"></a>
+        <div class="quiz-brand-copy">
+          <strong>WorkMesh Live Survey</strong>
+          <span>Join the action on your screen</span>
+        </div>
+      </div>
+      <div class="quiz-badges">
+        <span class="quiz-badge">Room Code <strong id="sessionChip">----</strong></span>
+        <span class="quiz-badge">Room State <strong id="stateChip">lobby</strong></span>
+        <span class="quiz-badge">Timer <strong id="playerTimer">--</strong></span>
+      </div>
+    </header>
+
+    <!-- Live Presenter sync panel -->
+    <section id="quizRoot" class="quiz-layout">
+      <article class="quiz-stage-panel">
+        <div class="quiz-stage-content">
+          <div class="quiz-question-header">
+            <div>
+              <div class="quiz-question-kicker" id="liveSlideHeader">Live Survey Slide</div>
+              <div id="quizTitle" class="quiz-question-title">Waiting for presenter...</div>
+              <div id="roundMeta" class="quiz-question-subtitle">Once the host starts, options appear.</div>
+            </div>
+            <div class="quiz-timer">
+              <span>Slide</span>
+              <strong id="questionIndex">0</strong>
+            </div>
+          </div>
+
+          <div id="questionText" class="quiz-question-title" style="font-size: clamp(1.5rem, 3vw, 2.6rem); line-height: 1.2; overflow-wrap:anywhere; word-break:break-word; white-space:normal;">Waiting for host to launch the presentation.</div>
+          <div class="quiz-meter"><div id="timerFill" class="quiz-meter-bar"></div></div>
+          
+          <!-- Interactive Input viewport -->
+          <div id="playerInputContainer" style="margin-top: 15px; display:flex; flex-direction:column; width:100%;">
+            <div id="optionList" class="quiz-answer-grid" style="width:100%;"></div>
+          </div>
+
+          <div id="playerHint" class="quiz-reveal-banner">Locked in. BE READY FOR THE SLIDES</div>
+
+          <!-- Reaction Toolbar -->
+          <div class="reactions-toolbar" style="margin-top:20px; display:flex; justify-content:center; gap:20px; padding:12px; background:rgba(255,255,255,0.9); border:1px solid var(--border); border-radius:18px; box-shadow: 0 4px 12px rgba(0,0,0,0.05); width:100%;">
+            <button class="reaction-btn" data-emoji="❤️" style="font-size:1.8rem; border:none; background:transparent; cursor:pointer; transition:transform 0.15s ease;">❤️</button>
+            <button class="reaction-btn" data-emoji="👍" style="font-size:1.8rem; border:none; background:transparent; cursor:pointer; transition:transform 0.15s ease;">👍</button>
+            <button class="reaction-btn" data-emoji="👏" style="font-size:1.8rem; border:none; background:transparent; cursor:pointer; transition:transform 0.15s ease;">👏</button>
+            <button class="reaction-btn" data-emoji="🤯" style="font-size:1.8rem; border:none; background:transparent; cursor:pointer; transition:transform 0.15s ease;">🤯</button>
+          </div>
+        </div>
+      </article>
+
+      <aside class="quiz-side-panel">
+        <!-- Scoreboard is intentionally omitted for surveys -->
+        <div class="quiz-rail-card">
+          <h3>Slide Status</h3>
+          <p id="roundStatus" class="quiz-mini-note">Waiting for presenter.</p>
+          <p id="answerState" class="quiz-mini-note" style="margin-top:4px; font-weight:700; color:var(--primary);">Submitted: No</p>
+        </div>
+        <button id="leaveBtn" class="btn btn-outline" type="button">Leave Room</button>
+      </aside>
+    </section>
+  </main>
+
+  <script type="module" src="js/survey-player-ui.js"></script>
+</body>
+</html>

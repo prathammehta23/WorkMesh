@@ -1,0 +1,6 @@
+{
+  "dependencies": {
+    "jsdom": "^27.0.1",
+    "puppeteer": "^25.2.1"
+  }
+}

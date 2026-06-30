@@ -1,0 +1,180 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Quiz Studio | WorkMesh Arcade</title>
+  <link rel="stylesheet" href="css/admin.css">
+  <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+</head>
+<body class="quiz-page">
+  <main class="quiz-host-shell">
+    <header class="quiz-app-header">
+      <div class="quiz-brand">
+        <a href="index.html" title="Back to Arcade"><img src="img/logo.jpg" alt="WorkMesh" style="width: 44px; height: 44px; border-radius: 12px; object-fit: cover; box-shadow: 0 4px 12px rgba(0,0,0,0.1);"></a>
+        <div class="quiz-brand-copy">
+          <strong>WorkMesh Survey Studio</strong>
+          <span>Host view for live survey control</span>
+        </div>
+        <div style="margin-left: 20px; border-left: 1px solid var(--border); padding-left: 20px;">
+          <a href="admin.html" class="btn btn-outline" style="text-decoration: none; font-size: 0.85rem; padding: 6px 12px; border-radius: 12px; display: inline-flex; align-items: center; gap: 6px;">
+            <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+            Switch to Quiz Mode
+          </a>
+        </div>
+      </div>
+      <div class="quiz-badges">
+        <span class="quiz-badge">Room Code <strong id="sessionCodeDisplay">----</strong></span>
+        <button id="copyShareLinkBtn" class="btn btn-outline" style="display:none; padding:4px 10px; font-size:0.8rem; border-radius:12px; margin-left: 8px;">🔗 Copy Player Link</button>
+        <span class="quiz-badge">Room State <strong id="quizStateDisplay">Not created</strong></span>
+        <span class="quiz-badge">Active Slide <strong id="activeQuestionDisplay">None</strong></span>
+      </div>
+    </header>
+
+    <section class="quiz-layout">
+      <!-- Left Slide Navigator Sidebar -->
+      <aside class="quiz-left-panel" style="display: flex; flex-direction: column; max-height: calc(100vh - 120px);">
+        <div class="quiz-rail-card" style="flex: 1; display: flex; flex-direction: column; overflow: hidden; padding: 16px;">
+          <h3 style="margin-bottom: 12px; display:flex; justify-content:space-between; align-items:center;">
+            Slides
+            <button id="addNewSlideBtn" class="btn btn-accent" style="padding: 4px 10px; font-size: 0.8rem; border-radius: 8px;">➕ Add</button>
+          </h3>
+          <div id="questionQueue" class="question-list" style="overflow-y: auto; flex: 1; padding-right: 6px;"></div>
+        </div>
+      </aside>
+
+      <!-- Main presentation viewport -->
+      <article class="quiz-stage-panel" id="presenterStage">
+        <!-- Floating emojis reactions overlay -->
+        <div id="reactionsContainer" class="reactions-floating-container" style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; overflow: hidden; z-index: 10;"></div>
+
+        <!-- background dynamic blurred mesh blobs for presenter mode -->
+        <div class="present-bg-blob present-bg-blob-1"></div>
+        <div class="present-bg-blob present-bg-blob-2"></div>
+        <div class="present-bg-blob present-bg-blob-3"></div>
+
+        <div class="quiz-question-header">
+          <div>
+            <div class="quiz-question-kicker" id="presenterStageLabel">Presenter slide</div>
+            <div id="previewQuestion" class="quiz-question-title">Write a question to preview it here.</div>
+            <div class="quiz-question-subtitle" id="previewMeta">Use the composer to build a question, then launch it live.</div>
+          </div>
+          <div class="quiz-timer" style="display: flex; flex-direction: column; gap: 8px;">
+            <div>
+              <span>Timer</span>
+              <strong id="previewTimer">15s</strong>
+            </div>
+            <button id="togglePresentBtn" class="btn btn-outline" style="padding: 8px 12px; margin-top:0; font-size:0.8rem; width:100%; font-weight:700;">📺 Present</button>
+          </div>
+        </div>
+        <div class="quiz-meter"><div id="previewProgress" class="quiz-meter-bar"></div></div>
+        
+        <!-- Interactive visualizers go here -->
+        <div id="visualizerContainer" style="margin-top: 20px; flex: 1;">
+          <div id="previewOptions" class="quiz-answer-grid"></div>
+        </div>
+
+        <div id="liveReveal" class="quiz-reveal-banner" style="display:none;"></div>
+
+        <!-- Fullscreen Present Mode Floating Navigation Bar -->
+        <div class="presenter-floating-bar" id="presenterToolbar">
+          <button class="presenter-toolbar-btn" id="toolbarPrev" title="Previous Slide (◀️)">◀️</button>
+          <button class="presenter-toolbar-btn" id="toolbarAnonToggle" title="Toggle Anonymity (👤/🕵️)">🕵️ Anonymity: ON</button>
+          <button class="presenter-toolbar-btn" id="toolbarDeepDive" title="Spawn Follow-up Question">🔍 Deep Dive</button>
+          <button class="presenter-toolbar-btn" id="toolbarCrossFilter" title="Toggle Cross Filtering (🔗)">🔗 Cross Filter: OFF</button>
+          <button class="presenter-toolbar-btn" id="toolbarResults" title="Toggle Results (👁️)">👁️ Results</button>
+          <button class="presenter-toolbar-btn" id="toolbarNext" title="Next Slide (▶️)">▶️</button>
+          <button class="presenter-toolbar-btn" id="toolbarExit" style="color:#ff3b30;" title="Exit Presentation (Esc)">❌</button>
+        </div>
+      </article>
+
+      <aside class="quiz-side-panel">
+        <div class="quiz-rail-card">
+          <div class="quiz-question-meta" style="display:flex;gap:8px;flex-wrap:wrap;align-items:center;">
+            <span class="quiz-badge">Players <strong id="playerCountDisplay">0</strong></span>
+            <span class="quiz-badge">Timer <strong id="hostTimer">--</strong></span>
+            <span class="quiz-badge">Current state <strong id="liveStateChip">idle</strong></span>
+          </div>
+          <div style="margin-top: 10px;">
+            <input id="quizTitle" placeholder="Name your Room (e.g. Friday Trivia)" style="width: 100%; margin-bottom: 10px; font-weight: bold;">
+            <input id="roomCodeInput" placeholder="Optional room code (e.g. ASDF)" style="width: 100%; margin-bottom: 10px; font-weight: bold; text-transform: uppercase;">
+            <p class="quiz-mini-note">Control presentation results visibility and answers live.</p>
+          </div>
+          <div class="quiz-host-controls" style="display:flex;gap:10px;flex-wrap:wrap;margin-top:12px;">
+            <button id="createSessionBtn" class="btn btn-primary" style="width: 100%;">Open / Create Room</button>
+            <button id="backSlideBtn" class="btn btn-outline" style="display:none;">◀️ Back</button>
+            <button id="startNextBtn" class="btn btn-accent">Start Slide</button>
+            <button id="endQuestionBtn" class="btn btn-outline">Reveal Answer</button>
+            <button id="showLeaderboardBtn" class="btn btn-primary" style="display:none;">🏆 Show Leaderboard</button>
+            <button id="toggleResultsBtn" class="btn btn-outline" style="display:none; align-items:center; gap:6px; justify-content:center;">👁️ <span id="toggleResultsText">Hide Results</span></button>
+            <button id="resetQuizBtn" class="btn btn-outline">Reset Room (Keep Questions)</button>
+            <p class="quiz-mini-note" style="margin: 0; width: 100%;">Clears players, scores, answers, and Q&A without deleting slides.</p>
+          </div>
+        </div>
+
+        <div class="quiz-rail-card">
+          <h3>Leaderboard</h3>
+          <ol id="liveLeaderboard" style="list-style-type: none; padding-left: 0; margin-top: 10px; display: grid; gap: 8px;"></ol>
+        </div>
+
+        <div class="quiz-rail-card" id="slideSettingsPanel" style="display:none;">
+          <h3 id="composerTitle">Slide Settings</h3>
+          <div class="quiz-composer">
+            <label style="margin-top: 6px; font-weight: 600; font-size: 0.9rem; color: var(--text-muted);">Slide Type
+              <select id="slideType" style="margin-top: 4px;">
+                <option value="multiple-choice" selected>Multiple Choice (Poll)</option>
+                <option value="word-cloud">Word Cloud</option>
+                <option value="open-ended">Open Ended (Brainstorm)</option>
+                <option value="scales">Scales (Star Rating)</option>
+                <option value="ranking">Ranking Preference</option>
+              </select>
+            </label>
+
+            <div class="question-actions" style="margin-top: 10px;">
+              <label id="correctAnswerLabel" style="display: none; min-width:180px;">Correct answer
+                <select id="correctAnswer">
+                  <option value="0">Option 1</option>
+                  <option value="1">Option 2</option>
+                  <option value="2">Option 3</option>
+                  <option value="3">Option 4</option>
+                </select>
+              </label>
+              <label style="min-width:160px;">Time limit
+                <select id="questionTime">
+                  <option value="10">10 seconds</option>
+                  <option value="15" selected>15 seconds</option>
+                  <option value="20">20 seconds</option>
+                  <option value="30">30 seconds</option>
+                  <option value="45">45 seconds</option>
+                  <option value="60">60 seconds</option>
+                </select>
+              </label>
+            </div>
+            
+            <button id="deleteSlideBtn" class="btn btn-outline" style="color:#ff3b30; margin-top:16px; width:100%;">🗑️ Delete Slide</button>
+          </div>
+        </div>
+
+        </div>
+      </aside>
+    </section>
+
+    <!-- Q&A Toggle and Panel -->
+    <button class="qa-drawer-toggle" id="qaToggle">
+      <span style="font-size: 1.8rem;">💬</span>
+      <span class="qa-badge-count" id="qaCount">0</span>
+    </button>
+
+    <div class="qa-drawer-panel" id="qaDrawer">
+      <div class="qa-drawer-header">
+        <h3>Audience Q&A</h3>
+        <button class="qa-drawer-close" id="qaClose">×</button>
+      </div>
+      <div class="qa-list" id="qaList">
+        <div class="quiz-mini-note">No questions from the audience yet.</div>
+      </div>
+    </div>
+  </main>
+
+  <script type="module" src="js/survey-admin-ui.js"></script>
+</body>
+</html>
